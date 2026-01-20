@@ -8,6 +8,10 @@ import datetime
 from dotenv import load_dotenv
 import webserver
 
+
+from flask import Flask
+from threading import Thread
+
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -36,6 +40,21 @@ session = SessionState()
 LOOT_FILE = "membersData.txt"
 
 roleReactMsgId = 1463224748749099177
+
+
+app = Flask('')
+@app.route('/')
+def home():
+    return "Discord bot ok"
+
+def run():
+    app.run(host="0.0.0.0", port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+
 
 # ---------- Helper functions ----------
 async def load_loot():
