@@ -6,7 +6,7 @@ import logging
 import os
 import datetime
 from dotenv import load_dotenv
-import webserver
+#import webserver
 
 
 from flask import Flask
@@ -273,7 +273,7 @@ async def status(ctx):
     await ctx.send(f"Status: HP={session.hp}, current channel={channel_name}")
 
 # ---------- Run ----------
-webserver.keep_alive()
+#webserver.keep_alive()
 bot.run(TOKEN)
 
 
