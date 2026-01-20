@@ -13,7 +13,7 @@ from flask import Flask
 from threading import Thread
 
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("discordkey")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("bot")
