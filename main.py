@@ -13,7 +13,9 @@ from flask import Flask
 from threading import Thread
 
 load_dotenv()
-TOKEN = os.getenv("discordkey")
+loc = 'DISCORD_TOKEN'
+pub = 'discordkey'
+TOKEN = os.getenv(pub)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("bot")
@@ -27,19 +29,23 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 class SessionState:
     def __init__(self):
         self.hp = 2
-        self.max_hp = 2
+        self.max_hp = 3
         self.loot_id = None
         self.current_channel = None  # always a discord.TextChannel
         self.user_loot = {}
         self.last_gold_response = {}  # per-channel throttle
         self.minTime = 1500
-        self.maxTime = 80000
+        self.maxTime = 70000
         self.respawnDaysMax = 3
+        self.nextRandMsg = None
 
 session = SessionState()
 LOOT_FILE = "membersData.txt"
 
-roleReactMsgId = 1463224748749099177
+roleReactMsgId = [
+    1463294603250634857,
+    1463294624272613490
+]
 
 
 app = Flask('')
@@ -90,10 +96,56 @@ gold_responses = [
     'hiii', 
     ':eyes:'
 ]
+
 random_messages = [
     '(walks past)', 
     '(coughs)', 
-    '(cough cough)']
+    '(cough cough)',
+    'urgh',
+    'hrm',
+    'huff',
+    'has anybody seen my inhaler',
+    '(grinds axe)',
+    '(buries hatchet)',
+    'you know which part of a joke is the most important? the execution- har har har',
+    'is that gold over there',
+    '(achoo)',
+    '(stands menacingly)',
+    '(looks for a fight)',
+    'i sure hope no one takes my loot today',
+    'yarr',
+    '(cough)',
+    '(draped in shadow)',
+    'ugg',
+    'trans rights',
+    'what\'s up my goat :goat:',
+    'my boss is gonna kill me if he finds out how few people i executed this week',
+    'you\'re gonna need a rescue party after i\'m done with you',
+    '(walks by)',
+    'har har har',
+    'what\'s that over there',
+    'huff',
+    'arr',
+    'phew',
+    'argh',
+    '(grunt)',
+    '(grunts)',
+    'grr',
+    'grrrr',
+    'boo!',
+    'ha ha ha',
+    ':3',
+    ':/',
+    ':)',
+    ':0',
+    'i\'m too old for this crap',
+    'where is my axe',
+    'where is my wife',
+    'has anybody seen my scary robe and hood',
+    'hey can you watch my kid for me for a sec <:greed_babane:1463223765453508679>',
+    'hey'
+
+    ]
 
 hit_responses = [
     'oof',
@@ -111,43 +163,86 @@ hit_responses = [
     'ahhh...'
 ]
 
-random_channels = [1462817378747547752, 1463159978960486515]
+random_channels = [
+    1339606740626444330, 
+    1339607410851053599,
+    1339628444757262461,
+    1340384199340986388,
+    1417802113022693397,
+
+    1463315121555243009,
+    1463315121555243009,
+    1463315121555243009,
+    1463315121555243009,
+    1463315121555243009,
+    ]
+
+botNotificationChannel = 1463315121555243009
 
 # ---------- Events ----------
 @bot.event
 async def on_ready():
-    logger.info(f"Bot ready: {bot.user}")
-    await load_loot()
-    bot.loop.create_task(background_loop())
-    bot.loop.create_task(daily_respawn())
+    if not hasattr(bot, "tasks_started"):
+        bot.tasks_started = True
+        logger.info(f"Bot ready: {bot.user}")
+        await load_loot()
+        bot.loop.create_task(background_loop())
+        bot.loop.create_task(daily_respawn())
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    if roleReactMsgId == payload.message_id:
+    if payload.message_id == roleReactMsgId[0] or payload.message_id == roleReactMsgId[1]:
         member = payload.member
         guild = member.guild
 
-        emoji = payload.emoji.name
-        if emoji == '🔥':
-            role = discord.utils.get(guild.roles, name='testRole')
+        emoji = payload.emoji.id
+        if emoji == 1463197948992032966:
+            role = discord.utils.get(guild.roles, name='Community Events')
+        elif emoji == 1463199521663356928:
+            role = discord.utils.get(guild.roles, name='Public Playtesting')
+        elif emoji == 1463198073445552395:
+            role = discord.utils.get(guild.roles, name='Executioner Hunter')
+        elif emoji == 1463223765453508679:
+            role = discord.utils.get(guild.roles, name='Game Developer')
+        elif emoji == 1463221838674002104:
+            role = discord.utils.get(guild.roles, name='Player')
+        elif emoji == 1463242519050588160:
+            role = discord.utils.get(guild.roles, name='Public Playtesting')
+        else: 
+            print(f"test, no role found - {emoji}")
+            return
 
         await member.add_roles(role)
     
 
 @bot.event
 async def on_raw_reaction_remove(payload):
-    if roleReactMsgId == payload.message_id:
+    if payload.message_id == roleReactMsgId[0] or payload.message_id == roleReactMsgId[1]:
         guild = await(bot.fetch_guild(payload.guild_id))
-        emoji = payload.emoji.name
         
-        if emoji == '🔥':
-            role = discord.utils.get(guild.roles, name='testRole')
+        emoji = payload.emoji.id
+        if emoji == 1463197948992032966:
+            role = discord.utils.get(guild.roles, name='Community Events')
+        elif emoji == 1463199521663356928:
+            role = discord.utils.get(guild.roles, name='Public Playtesting')
+        elif emoji == 1463198073445552395:
+            role = discord.utils.get(guild.roles, name='Executioner Hunter')
+        elif emoji == 1463223765453508679:
+            role = discord.utils.get(guild.roles, name='Game Developer')
+        elif emoji == 1463221838674002104:
+            role = discord.utils.get(guild.roles, name='Player')
+        elif emoji == 1463242519050588160:
+            role = discord.utils.get(guild.roles, name='Public Playtesting')
+        else: 
+            print(f"test, no role found - {emoji}")
+            return
 
         member = await(guild.fetch_member(payload.user_id))
         if member is not None:
             await member.remove_roles(role)
         else:
             print("Member not found")
+
 
 @bot.event
 async def on_message(message):
@@ -174,13 +269,20 @@ async def handle_gold_response(message):
             session.current_channel = message.channel
     except Exception:
         logger.exception("Error handling gold response")
-
+    
 # ---------- Background loop ----------
 async def background_loop():
     while True:
         try:
             if session.hp > 0:
-                await asyncio.sleep(random.randint(session.minTime, session.maxTime))
+                now = datetime.datetime.now()
+
+                delay_seconds = random.randint(session.minTime, session.maxTime)
+                nextTime = now + datetime.timedelta(seconds=delay_seconds)
+
+                session.nextRandMsg = nextTime  # ✅ this is saved correctly
+
+                await asyncio.sleep(delay_seconds)
                 channel_id = random.choice(random_channels)
                 channel = bot.get_channel(channel_id)
 
@@ -193,20 +295,33 @@ async def background_loop():
                     await channel.send(random.choice(random_messages))
             else:
                 # If HP <= 0, slow down loop to avoid CPU spin
-                await asyncio.sleep(5) #FIX sätt till typ 120
+                await asyncio.sleep(120) #FIX sätt till typ 120
         except Exception:
             logger.exception("Error in background loop")
             await asyncio.sleep(5)  # slow down after exception
 
 async def daily_respawn():
+    role = None
+    channel = bot.get_channel(botNotificationChannel)
     while True:
-        now = datetime.datetime.now()
-        next_respawn = datetime.datetime.combine(now.date(), datetime.time(hour=6, minute=0)) + datetime.timedelta(days=random.randrange(1, session.respawnDaysMax))
-        wait_seconds = (next_respawn - now).total_seconds()
-        await asyncio.sleep(wait_seconds)
-        session.hp = session.max_hp
-        #if session.current_channel:
-            #await session.current_channel.send("Bot has respawned for a new day!")
+        if(session.hp < 1):
+            now = datetime.datetime.now()
+            next_respawn = datetime.datetime.combine(now.date(), datetime.time(hour=6, minute=0)) + datetime.timedelta(days=random.randrange(1, session.respawnDaysMax))
+            wait_seconds = (next_respawn - now).total_seconds()
+            await asyncio.sleep(wait_seconds-600)
+            if channel:
+                if role is None:
+                    guild = channel.guild
+                    role = guild.get_role(1463297281322127587)
+
+                if role:
+                    await channel.send(f"{role.mention} The Executioner is about to respawn soon...")
+
+            #mention role here, roleid: 1463297281322127587
+            await asyncio.sleep(random.randrange(60, 600))
+            session.hp = random.randrange(1, session.max_hp)
+        else:
+            await asyncio.sleep(600)
 
 # ---------- Commands ----------
 @bot.command()
@@ -229,9 +344,9 @@ async def hit(ctx):
             else:
                 await ctx.reply("*dodges*")
         else:
-            await ctx.reply("*dies*")
+            await ctx.reply("*dies* <:greed_dead:1463198222091682018>")
             await asyncio.sleep(0.5)
-            msg = await ctx.send("*drops loot :coin:*")
+            msg = await ctx.send("*drops loot <:greed_gold:1463188620205756508>*")
             session.loot_id = msg.id
     except Exception:
         logger.exception("Error in hit command")
@@ -258,19 +373,25 @@ async def loot(ctx):
 @bot.command()
 async def checkgold(ctx):
     amount = session.user_loot.get(ctx.author.id,0)
-    await ctx.reply(f"{ctx.author.mention} You have {amount} gold")
+    await ctx.reply(f"{ctx.author.mention} You have {amount} gold <:greed_gold:1463188620205756508>")
 
 @bot.command()
 @commands.is_owner()
 async def spawn(ctx):
-    session.hp = session.max_hp
-    await ctx.send("Respawned")
+    session.hp = random.randrange(1, session.max_hp)
+    await ctx.send("Respawned <:greed_executioner:1463198073445552395>")
 
 @bot.command()
 @commands.is_owner()
 async def status(ctx):
     channel_name = session.current_channel.name if isinstance(session.current_channel, discord.TextChannel) else "None"
-    await ctx.send(f"Status: HP={session.hp}, current channel={channel_name}")
+    await ctx.send(f"Status: HP={session.hp}, current channel={channel_name}, next random message time: {session.nextRandMsg}")
+
+@bot.command()
+@commands.is_owner()
+async def shutdown(ctx):
+    await ctx.send("Shutting down bot… 👋")
+    await bot.close()
 
 # ---------- Run ----------
 #webserver.keep_alive()
