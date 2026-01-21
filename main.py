@@ -8,9 +8,10 @@ import datetime
 from dotenv import load_dotenv
 #import webserver
 
+#pinged by uptimerobot
 
-from flask import Flask
-from threading import Thread
+#from flask import Flask
+#from threading import Thread
 
 load_dotenv()
 loc = 'DISCORD_TOKEN'
@@ -48,17 +49,17 @@ roleReactMsgId = [
 ]
 
 
-app = Flask('')
-@app.route('/')
-def home():
-    return "Discord bot ok"
+# app = Flask('')
+# @app.route('/')
+# def home():
+#     return "Discord bot ok"
 
-def run():
-    app.run(host="0.0.0.0", port=8080)
+# def run():
+#     app.run(host="0.0.0.0", port=8080)
 
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
+# def keep_alive():
+#     t = Thread(target=run)
+#     t.start()
 
 
 
@@ -395,8 +396,9 @@ async def shutdown(ctx):
 
 # ---------- Run ----------
 #webserver.keep_alive()
-bot.run(TOKEN)
-
+#bot.run(TOKEN)
+if __name__ == "__main__":
+    bot.run(os.getenv(TOKEN))
 
 # import discord
 # from discord.ext import commands
