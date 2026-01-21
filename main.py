@@ -398,7 +398,7 @@ async def shutdown(ctx):
 #webserver.keep_alive()
 #bot.run(TOKEN)
 if __name__ == "__main__":
-    bot.run(os.getenv(TOKEN))
+    bot.run(TOKEN)
 
 # import discord
 # from discord.ext import commands
